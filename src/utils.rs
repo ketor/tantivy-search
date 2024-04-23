@@ -1,13 +1,19 @@
-use crate::LOG_CALLBACK;
 use crate::logger::ffi_logger::callback_with_thread_info;
+use crate::LOG_CALLBACK;
 
-use std::{path::Path, fs::{self, File}, io::{Write, Read}};
+use std::{
+    fs::{self, File},
+    io::{Read, Write},
+    path::Path,
+};
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use tantivy::{Index, IndexReader, IndexWriter};
 
-use crate::{commons::{CUSTOM_INDEX_SETTING_FILE_NAME, LOGGER_TARGET}, WARNING};
-
+use crate::{
+    commons::{CUSTOM_INDEX_SETTING_FILE_NAME, LOGGER_TARGET},
+    WARNING,
+};
 
 pub struct IndexR {
     pub path: String,
@@ -24,7 +30,14 @@ impl Drop for IndexR {
 pub struct IndexW {
     pub path: String,
     pub index: Index,
-    pub writer: IndexWriter
+    pub writer: IndexWriter,
+}
+
+pub struct IndexRW {
+    pub path: String,
+    pub index: Index,
+    pub reader: IndexReader,
+    pub writer: IndexWriter,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -32,18 +45,17 @@ pub struct CustomIndexSetting {
     pub language: String,
 }
 
-
 #[derive(Debug)]
 pub enum SearchError {
     NullIndexReader,
-    InvalidQueryStr
+    InvalidQueryStr,
 }
 
 impl std::fmt::Display for SearchError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SearchError::NullIndexReader => write!(f, "IndexReader pointer is null"),
-            SearchError::InvalidQueryStr => write!(f, "Invalid query string")
+            SearchError::InvalidQueryStr => write!(f, "Invalid query string"),
         }
     }
 }
@@ -58,15 +70,21 @@ pub fn prepare_index_directory(path: &Path) -> Result<(), std::io::Error> {
 }
 
 /// Save the custom index settings to a file.
-pub fn save_custom_index_setting(path: &Path, setting: &CustomIndexSetting) -> Result<(), std::io::Error> {
+pub fn save_custom_index_setting(
+    path: &Path,
+    setting: &CustomIndexSetting,
+) -> Result<(), std::io::Error> {
     let file_path = path.join(CUSTOM_INDEX_SETTING_FILE_NAME);
     let mut file = File::create(&file_path)?;
-    let setting_json = serde_json::to_string(setting).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+    let setting_json = serde_json::to_string(setting)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
     file.write_all(setting_json.as_bytes())
 }
 
 /// Loads the custom index settings from a file.
-pub fn load_custom_index_setting(index_file_path: &Path) -> Result<CustomIndexSetting, std::io::Error> {
+pub fn load_custom_index_setting(
+    index_file_path: &Path,
+) -> Result<CustomIndexSetting, std::io::Error> {
     let file_path = index_file_path.join(CUSTOM_INDEX_SETTING_FILE_NAME);
     let mut file = File::open(file_path)?;
     let mut contents = String::new();
@@ -82,13 +100,15 @@ pub fn like_to_regex(like_pattern: &str) -> String {
     for c in like_pattern.chars() {
         match c {
             // got r'\', if not escape currently, need escape.
-            '\\' if !escape => {escape = true;},
+            '\\' if !escape => {
+                escape = true;
+            }
 
             // got r'\', if escaped currently, need push r'\\'
             '\\' if escape => {
                 regex_pattern.push_str("\\\\");
                 escape = false;
-            },
+            }
 
             // In not escape mode, convert '%' to '.*'
             '%' if !escape => regex_pattern.push_str(".*"),
@@ -100,7 +120,7 @@ pub fn like_to_regex(like_pattern: &str) -> String {
             '%' | '_' if escape => {
                 regex_pattern.push(c);
                 escape = false;
-            },
+            }
 
             // Handle regex special chars.
             _ => {
@@ -109,14 +129,12 @@ pub fn like_to_regex(like_pattern: &str) -> String {
                 }
                 regex_pattern.push(c);
                 escape = false;
-            },
+            }
         }
     }
 
     regex_pattern
 }
-
-
 
 #[cfg(test)]
 mod tests {

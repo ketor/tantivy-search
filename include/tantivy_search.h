@@ -9,6 +9,8 @@
 
 struct TantivySearchIndexR;
 
+struct TantivySearchIndexRW;
+
 struct TantivySearchIndexW;
 
 using TantivySearchLogCallback = void(*)(int32_t, const char*, const char*, const char*);
@@ -128,6 +130,95 @@ void tantivy_reader_free(TantivySearchIndexR *ir);
 /// Arguments:
 /// - `iw`: Pointer to the index writer.
 void tantivy_writer_free(TantivySearchIndexW *iw);
+
+/// Creates an index using the default language.
+///
+/// Arguments:
+/// - `dir_ptr`: A pointer to the directory path where the index files will be created.
+///
+/// Returns:
+/// - A pointer to `IndexW`, which encapsulates the index and writer.
+/// - Returns a null pointer if any error occurs during the process.
+TantivySearchIndexRW *tantivy_create_index2(const char *dir_ptr);
+
+/// Creates an index using a specified language (e.g., Chinese, English, Japanese, etc.).
+///
+/// Arguments:
+/// - `dir_ptr`: The directory path for building the index.
+/// - `language`: The language to be used.
+///
+/// Returns:
+/// - A pointer to the created `IndexW`, or a null pointer if an error occurs.
+TantivySearchIndexRW *tantivy_create_index_with_language2(const char *dir_ptr,
+                                                          const char *language);
+
+/// Loads an index from a specified directory.
+///
+/// Arguments:
+/// - `dir_ptr`: A pointer to the directory path where the index files are located.
+///
+/// Returns:
+/// - A pointer to `IndexR`, which encapsulates the loaded index and reader.
+/// - Returns a null pointer if any error occurs during the loading process.
+TantivySearchIndexRW *tantivy_load_index2(const char *dir_ptr);
+
+/// Indexes a document.
+///
+/// Arguments:
+/// - `iw`: Pointer to the index writer.
+/// - `row_id_`: Row ID associated with the document.
+/// - `text_`: Pointer to the text data of the document.
+///
+/// Returns:
+/// - A non-zero value if successful, zero otherwise.
+bool tantivy_index_doc2(TantivySearchIndexRW *iw, uint64_t row_id_, const char *text_);
+
+/// Commits the changes to the index, writing it to the file system.
+///
+/// Arguments:
+/// - `iw`: Pointer to the index writer.
+///
+/// Returns:
+/// - A non-zero value if successful, zero otherwise.
+bool tantivy_commit2(TantivySearchIndexRW *iw);
+
+/// Frees the index reader.
+///
+/// Arguments:
+/// - `ir`: Pointer to the index reader.
+void tantivy_free2(TantivySearchIndexRW *ir);
+
+/// Determines if a query string appears within a specified row ID range.
+///
+/// Arguments:
+/// - `ir`: Pointer to the index reader.
+/// - `query_ptr`: Pointer to the query string.
+/// - `lrange`: The left (inclusive) boundary of the row ID range.
+/// - `rrange`: The right (inclusive) boundary of the row ID range.
+///
+/// Returns:
+/// - `true` if the query string appears in the given row ID range, `false` otherwise.
+bool tantivy_search2(TantivySearchIndexRW *ir,
+                     const char *query_ptr,
+                     uint64_t lrange,
+                     uint64_t rrange,
+                     bool use_regrex);
+
+/// Counts the occurrences of a query string within a specified row ID range.
+///
+/// Arguments:
+/// - `ir`: Pointer to the index reader.
+/// - `query_ptr`: Pointer to the query string.
+/// - `lrange`: The left (inclusive) boundary of the row ID range.
+/// - `rrange`: The right (inclusive) boundary of the row ID range.
+///
+/// Returns:
+/// - The count of occurrences of the query string within the row ID range.
+unsigned int tantivy_count_in_rowid_range2(TantivySearchIndexRW *ir,
+                                           const char *query_ptr,
+                                           uint64_t lrange,
+                                           uint64_t rrange,
+                                           bool use_regex);
 
 } // extern "C"
 
