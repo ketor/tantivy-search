@@ -165,13 +165,13 @@ TantivySearchIndexRW *tantivy_load_index2(const char *dir_ptr);
 /// Indexes a document.
 ///
 /// Arguments:
-/// - `iw`: Pointer to the index writer.
+/// - `index`: Pointer to the index writer.
 /// - `row_id_`: Row ID associated with the document.
 /// - `text_`: Pointer to the text data of the document.
 ///
 /// Returns:
 /// - A non-zero value if successful, zero otherwise.
-bool tantivy_index_doc2(TantivySearchIndexRW *iw, uint64_t row_id_, const char *text_);
+bool tantivy_index_doc2(TantivySearchIndexRW *index, uint64_t row_id_, const char *text_);
 
 /// Commits the changes to the index, writing it to the file system.
 ///

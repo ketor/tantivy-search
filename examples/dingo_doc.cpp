@@ -157,6 +157,9 @@ void test_tokenizer_create() {
                             true);
   TantivySearchIndexRW *indexRW =
       tantivy_create_index_with_language2("./temp", "chinese");
+
+  TantivySearchIndexRW *indexRW3 = tantivy_load_index2("./temp");
+
   tantivy_index_doc2(
       indexRW, 0,
       "古代帝国的兴衰更迭，不仅塑造了历史的进程，也铭刻了时代的变"
@@ -226,20 +229,32 @@ void test_tokenizer_create() {
   tantivy_logger_initialize("./log/", "info", true, tantivy_log_callback, true,
                             true);
 
+  auto commit_ret = tantivy_commit2(indexRW);
+  cout << "commit_ret:" << commit_ret << endl;
+
   int searched_for_chinese2 =
       tantivy_count_in_rowid_range2(indexRW, "影响深远", 0, 19, false);
   cout << "searched_for_chinese2:" << searched_for_chinese2 << endl;
 
-  tantivy_commit2(indexRW);
+  bool searched_for_chinese3 =
+      tantivy_search2(indexRW, "影响深远", 0, 19, false);
+  cout << "searched_for_chinese3:" << searched_for_chinese3 << endl;
+
   tantivy_free2(indexRW);
 
   // search
-  TantivySearchIndexR *indexR = tantivy_load_index("./temp");
-  int searched_for_chinese =
-      tantivy_count_in_rowid_range(indexR, "影响深远", 0, 19, false);
-  cout << "searched_for_chinese:" << searched_for_chinese << endl;
+  //   TantivySearchIndexR *indexR = tantivy_load_index("./temp");
+  //   int searched_for_chinese =
+  //       tantivy_count_in_rowid_range(indexR, "影响深远", 0, 19, false);
+  //   cout << "searched_for_chinese:" << searched_for_chinese << endl;
+  //   tantivy_reader_free(indexR);
 
-  tantivy_reader_free(indexR);
+  // search
+  int searched_for_chinese4 =
+      tantivy_count_in_rowid_range2(indexRW3, "影响深远", 0, 19, false);
+  cout << "searched_for_chinese4:" << searched_for_chinese4 << endl;
+
+  tantivy_free2(indexRW3);
 }
 
 int main() {

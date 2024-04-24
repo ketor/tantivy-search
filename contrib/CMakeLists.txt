@@ -7,7 +7,7 @@ add_subdirectory(google_test)
 add_subdirectory(benchmark)
 
 # gather third-party include directories
-set(CONTRIB_INCLUDE_DIRS 
+set(CONTRIB_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/json/single_include
     ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool
     ${CMAKE_CURRENT_SOURCE_DIR}/easylogging/src
@@ -17,7 +17,7 @@ set(CONTRIB_INCLUDE_DIRS
 )
 
 # gather third-party sources
-file(GLOB_RECURSE CONTRIB_SOURCES 
+file(GLOB_RECURSE CONTRIB_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/json/single_include/*
     ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/ThreadPool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/easylogging/src/*

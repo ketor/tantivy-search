@@ -34,5 +34,5 @@ foreach(DEMO ${DEMOS})
     # target_link_libraries(${FILE_NAME} PUBLIC ${JEMALLOC_LIBRARIES} tantivy_search tantivy_search_utils_lib)
     # 为 example target 指定 include 目录路径
     # target_include_directories(${FILE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-
 endforeach()
+

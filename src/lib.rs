@@ -781,7 +781,7 @@ pub extern "C" fn tantivy_create_index_with_language2(
     // OnCommit: reload when commit; Manual: developer need call IndexReader::reload() to reload.
     let reader: tantivy::IndexReader = match index
         .reader_builder()
-        .reload_policy(ReloadPolicy::OnCommit)
+        .reload_policy(ReloadPolicy::Manual)
         .try_into()
     {
         Ok(r) => r,
@@ -871,7 +871,7 @@ pub extern "C" fn tantivy_load_index2(dir_ptr: *const c_char) -> *mut IndexRW {
     // OnCommit: reload when commit; Manual: developer need call IndexReader::reload() to reload.
     let reader: tantivy::IndexReader = match index
         .reader_builder()
-        .reload_policy(ReloadPolicy::OnCommit)
+        .reload_policy(ReloadPolicy::Manual)
         .try_into()
     {
         Ok(r) => r,
@@ -913,15 +913,19 @@ pub extern "C" fn tantivy_load_index2(dir_ptr: *const c_char) -> *mut IndexRW {
 /// Indexes a document.
 ///
 /// Arguments:
-/// - `iw`: Pointer to the index writer.
+/// - `index`: Pointer to the index writer.
 /// - `row_id_`: Row ID associated with the document.
 /// - `text_`: Pointer to the text data of the document.
 ///
 /// Returns:
 /// - A non-zero value if successful, zero otherwise.
 #[no_mangle]
-pub extern "C" fn tantivy_index_doc2(iw: *mut IndexRW, row_id_: u64, text_: *const c_char) -> bool {
-    if iw.is_null() || text_.is_null() {
+pub extern "C" fn tantivy_index_doc2(
+    index: *mut IndexRW,
+    row_id_: u64,
+    text_: *const c_char,
+) -> bool {
+    if index.is_null() || text_.is_null() {
         ERROR!(target: LOGGER_TARGET, function: TANTIVY_INDEX_DOC_NAME, "Invalid arguments to tantivy_index_doc");
         return false;
     }
@@ -936,9 +940,9 @@ pub extern "C" fn tantivy_index_doc2(iw: *mut IndexRW, row_id_: u64, text_: *con
         }
     };
 
-    // 'iw' is a mutable reference. Exiting this scope will destroy 'iw', but the original object pointed to by '*iw' will not be dropped.
-    let iw: &mut IndexRW = unsafe { &mut *iw };
-    let schema = iw.index.schema();
+    // 'index_ptr' is a mutable reference. Exiting this scope will destroy 'index_ptr', but the original object pointed to by '*index' will not be dropped.
+    let index_ptr: &mut IndexRW = unsafe { &mut *index };
+    let schema = index_ptr.index.schema();
     let text_field = match schema.get_field("text") {
         Ok(text_field_) => text_field_,
         Err(_) => {
@@ -957,7 +961,9 @@ pub extern "C" fn tantivy_index_doc2(iw: *mut IndexRW, row_id_: u64, text_: *con
     doc.add_u64(row_id_field, row_id_);
     doc.add_text(text_field, text_str);
 
-    if iw.writer.add_document(doc).is_ok() {
+    if index_ptr.writer.add_document(doc).is_ok() {
+        index_ptr.writer.commit().unwrap();
+        index_ptr.reader.reload().unwrap();
         true
     } else {
         ERROR!(target: LOGGER_TARGET, function: TANTIVY_INDEX_DOC_NAME, "Failed to add document");
@@ -1183,21 +1189,8 @@ fn perform_search3(
             .map_err(|_| SearchError::InvalidQueryStr)?
     };
 
-    #[cfg(feature = "use-flurry-cache")]
-    {
-        // Resolve cache or compute the roaring bitmap for the given query.
-        let row_id_roaring_bitmap = CACHE_FOR_SKIP_INDEX.resolve(
-            (ir as usize, query_str.to_string(), indexr.path.to_string()),
-            || compute_bitmap2(&indexr, query_str, function_name, use_regrex),
-        );
-        intersect_and_return(row_id_roaring_bitmap, lrange, rrange)
-    }
-    #[cfg(not(feature = "use-flurry-cache"))]
-    {
-        // not use cache
-        let row_id_roaring_bitmap = compute_bitmap2(&indexr, query_str, function_name, use_regrex);
-        intersect_and_return(row_id_roaring_bitmap, lrange, rrange)
-    }
+    let row_id_roaring_bitmap = compute_bitmap2(&indexr, query_str, function_name, use_regrex);
+    intersect_and_return(row_id_roaring_bitmap, lrange, rrange)
 }
 
 fn compute_bitmap2(

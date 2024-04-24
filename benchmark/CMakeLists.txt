@@ -9,3 +9,5 @@ message(STATUS "Config benchmarks.")
 
 add_executable(tantivy_search_benchmark ${BENCHMARK_ENTRY} ${BENCHMARKS})
 target_link_libraries(tantivy_search_benchmark PUBLIC tantivy_search tantivy_search_contrib_lib dl)
+add_dependencies(tantivy_search_benchmark tantivy_library_build_target)
+
