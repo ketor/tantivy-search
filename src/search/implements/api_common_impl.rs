@@ -147,9 +147,7 @@ pub fn load_index_reader(index_path: &str) -> Result<bool, TantivySearchError> {
         // Set the multithreaded executor for search.
         match FFI_INDEX_SEARCHER_CACHE.get_shared_multithread_executor(2) {
             Ok(shared_thread_pool) => {
-                index
-                    .set_shared_multithread_executor(shared_thread_pool)
-                    .map_err(|e| TantivySearchError::TantivyError(e))?;
+                index.set_executor(shared_thread_pool.as_ref().clone());
                 DEBUG!(function:"load_index_reader", "Using shared multithread with index_path: [{}]", index_path);
             }
             Err(e) => {
@@ -170,7 +168,7 @@ pub fn load_index_reader(index_path: &str) -> Result<bool, TantivySearchError> {
     }
 
     // Create a reader for the index with an appropriate reload policy.
-    // OnCommit: reload when commit; Manual: developer need call IndexReader::reload() to reload.
+    // OnCommitWithDeplay: reload when commit; Manual: developer need call IndexReader::reload() to reload.
     let reader: IndexReader = index
         .reader_builder()
         .reload_policy(ReloadPolicy::OnCommitWithDelay)
