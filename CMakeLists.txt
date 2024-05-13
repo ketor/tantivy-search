@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(TANTIVY_LIB)
+
+option(BUILD_TESTS "Build unit tests" ON)
+option(BUILD_BENCHMARK "Build benchmark" ON)
+option(BUILD_EXAMPLES "Build sdk example" ON)
+
 add_subdirectory(contrib ${CMAKE_CURRENT_BINARY_DIR}/contrib)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -30,7 +35,6 @@ message(STATUS "Config cxx-bridge, use cxxflags: " ${RUST_CXXFLAGS})
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/.cargo/config.toml.in" "${CMAKE_CURRENT_SOURCE_DIR}/.cargo/config.toml" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/build.rs.in" "${CMAKE_CURRENT_SOURCE_DIR}/build.rs" @ONLY)
 
-
 set(cxx_bridge_binary_folder ${CMAKE_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED}/cxxbridge)
 set(cxx_bridge_source_file "src/lib.rs")
 
@@ -56,7 +60,6 @@ add_custom_command(
     DEPENDS ${rust_lib}-static
     COMMENT "Fixing cmake to find source files"
 )
-
 
 add_library(${rust_lib}_cxxbridge
     ${common_header}
@@ -85,7 +88,17 @@ target_link_libraries(${rust_lib}-total
 # for end-user to link into project
 add_library(rust::${rust_lib} ALIAS ${rust_lib}-total)
 
-add_subdirectory(benchmark ${CMAKE_CURRENT_BINARY_DIR}/benchmark)
-add_subdirectory(tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
-add_subdirectory(examples ${CMAKE_CURRENT_BINARY_DIR}/examples)
+if(BUILD_TESTS)
+    add_subdirectory(tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
+    message(STATUS "Build unit tests")
+endif()
 
+if(BUILD_BENCHMARK)
+    add_subdirectory(benchmark ${CMAKE_CURRENT_BINARY_DIR}/benchmark)
+    message(STATUS "Build benchmark")
+endif()
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples ${CMAKE_CURRENT_BINARY_DIR}/examples)
+    message(STATUS "Build sdk example")
+endif()

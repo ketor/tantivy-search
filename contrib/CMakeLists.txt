@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.2)
 
 project(TANTIVY_SEARCH_CONTRIB)
 
-add_subdirectory(boost-cmake)
-add_subdirectory(google_test)
-add_subdirectory(benchmark)
+if(BUILD_TESTS OR BUILD_BENCHMARK OR BUILD_EXAMPLES)
+    add_subdirectory(boost-cmake)
+    add_subdirectory(google_test)
+    add_subdirectory(benchmark)
+endif()
+
 add_subdirectory(corrosion-rs-cmake)
 add_subdirectory(croaring-cmake)
 
@@ -28,5 +31,9 @@ file(GLOB_RECURSE CONTRIB_SOURCES
 # create a library
 message(STATUS "Create tantivy_search contrib library")
 add_library(tantivy_search_contrib_lib ${CONTRIB_SOURCES})
-target_link_libraries(tantivy_search_contrib_lib PUBLIC boost::program_options benchmark::benchmark contrib::roaring)
+
+if(BUILD_TESTS OR BUILD_BENCHMARK OR BUILD_EXAMPLES)
+    target_link_libraries(tantivy_search_contrib_lib PUBLIC boost::program_options benchmark::benchmark contrib::roaring)
+endif()
+
 target_include_directories(tantivy_search_contrib_lib PUBLIC ${CONTRIB_INCLUDE_DIRS})
