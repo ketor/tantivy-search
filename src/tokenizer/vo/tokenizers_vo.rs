@@ -9,6 +9,7 @@ pub struct TokenizerConfig {
     pub doc_index: bool,
     pub is_text_field: bool,
 }
+
 impl TokenizerConfig {
     pub fn new(tokenizer_type: TokenizerType, analyzer: TextAnalyzer, stored: bool) -> Self {
         Self {

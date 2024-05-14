@@ -35,34 +35,23 @@ using namespace std;
 // --     }
 // --   }
 // -- }
+
 const std::string stem_json =
-    "{\"col1\": {\"tokenizer\": {\"type\": \"stem\", \"stop_word_filters\": "
-    "[\"english\", \"french\"], \"stem_languages\": [\"german\", \"english\"], "
-    "\"length_limit\": 60}}, \"col2\": {\"tokenizer\": {\"type\": "
-    "\"simple\"}}}";
+    R"({"col1": {"tokenizer": {"type": "stem", "stop_word_filters": ["english", "french"], "stem_languages": ["german", "english"], "length_limit": 60}}, "col2": {"tokenizer": {"type": "simple"}}})";
 
 const std::string raw_json =
-    "{ \"col1\": { \"tokenizer\": { \"type\": \"raw\" } }, \"col2\": { "
-    "\"tokenizer\": {\"type\": \"raw\"} }, \"col3\": { \"tokenizer\": "
-    "{\"type\": \"raw\"} } }";
+    R"({ "col1": { "tokenizer": { "type": "raw" } }, "col2": { "tokenizer": {"type": "raw"} }, "col3": { "tokenizer": {"type": "raw"} } })";
 
 const std::string simple_json =
-    "{ \"mapKeys(col1)\": { \"tokenizer\": { \"type\": \"stem\", "
-    "\"stop_word_filters\": [\"english\"], \"stem_languages\": [\"english\"]} "
-    "}, \"col2\": { \"tokenizer\": {\"type\": \"simple\"} } }";
+    R"lit({ "mapKeys(col1)": { "tokenizer": { "type": "stem", "stop_word_filters": ["english"], "stem_languages": ["english"]} }, "col2": { "tokenizer": {"type": "simple"} } })lit";
 
 const std::string simple_json2 =
-    "{ \"col1\": { \"tokenizer\": { \"type\": \"stem\", \"stop_word_filters\": "
-    "[\"english\"], \"stem_languages\": [\"english\"]} }, \"col2\": { "
-    "\"tokenizer\": {\"type\": \"simple\"} } }";
+    R"({ "col1": { "tokenizer": { "type": "stem", "stop_word_filters": ["english"], "stem_languages": ["english"]} }, "col2": { "tokenizer": {"type": "simple"} } })";
 
-const std::string chinese_json = "{\"text\":{\"tokenizer\":{\"type\":\"chinese\"}}}";
+const std::string chinese_json = R"({"text":{"tokenizer":{"type":"chinese"}}})";
 
 const std::string multi_type_column_json =
-    "{\"col1\": { \"tokenizer\": { \"type\": \"chinese\"}}, "
-    "\"col2\": { \"tokenizer\": {\"type\": \"i64\", \"indexed\": true }},"
-    "\"col3\": { \"tokenizer\": {\"type\": \"f64\", \"indexed\": true }},"
-    "\"col4\": { \"tokenizer\": {\"type\": \"chinese\"}} }";
+    R"({"col1": { "tokenizer": { "type": "chinese"}}, "col2": { "tokenizer": {"type": "i64", "indexed": true }}, "col3": { "tokenizer": {"type": "f64", "indexed": true }}, "col4": { "tokenizer": {"type": "chinese"}} })";
 
 void test_default_create() {
   fs::remove_all("./temp");
@@ -111,13 +100,13 @@ void test_default_create() {
 
   for (auto it : result) {
     cout << "rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id
-         << endl;
+         << '\n';
   }
 
   ffi_free_index_reader(index_path);
   ffi_free_index_writer(index_path);
 
-  cout << __func__ << " done" << endl;
+  cout << __func__ << " done" << '\n';
 }
 
 void test_get_index_info() {
@@ -132,16 +121,16 @@ void test_get_index_info() {
 
   auto index_meta = ffi_get_index_meta_json(index_path);
   if (index_meta.error_code != 0) {
-    cout << "ffi_get_index_meta_json error:" << index_meta.error_msg.c_str() << endl;
+    cout << "ffi_get_index_meta_json error:" << index_meta.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_get_index_meta_json success:" << index_meta.result.c_str() << endl;
+    cout << "ffi_get_index_meta_json success:" << index_meta.result.c_str() << '\n';
   }
 
   auto index_para = ffi_get_index_json_parameter(index_path);
   if (index_para.error_code != 0) {
-    cout << "ffi_get_index_json_parameter error:" << index_para.error_msg.c_str() << endl;
+    cout << "ffi_get_index_json_parameter error:" << index_para.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_get_index_json_parameter success:" << index_para.result.c_str() << endl;
+    cout << "ffi_get_index_json_parameter success:" << index_para.result.c_str() << '\n';
   }
 }
 
@@ -212,13 +201,13 @@ void test_tokenizer_create() {
 
   for (auto it : result) {
     cout << "rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id
-         << endl;
+         << '\n';
   }
 
   ffi_free_index_reader(index_path);
   ffi_free_index_writer(index_path);
 
-  cout << __func__ << " done" << endl;
+  cout << __func__ << " done" << '\n';
 }
 
 void create_and_load_chinese_data(const std::string& index_path) {
@@ -321,7 +310,7 @@ void test_multi_type_column() {
                                                "刻了时代的变迁与文明的发展。",
                                                "Ancient empires rise and fall, shaping history's course."},
                                               {"col2"}, {100}, {"col3"}, {100.0});
-  cout << "ffi_index_multi_type_column_docs ret:" << ret.result << endl;
+  cout << "ffi_index_multi_type_column_docs ret:" << ret.result << '\n';
 
   ffi_index_multi_type_column_docs(index_path, 1, text_column_names,
                                    {"艺术的多样表达方式反映了不同文化的丰富遗产，展现了人类创造力的无限可能"
@@ -368,79 +357,79 @@ void test_multi_type_column() {
   ffi_load_index_reader(index_path);
 
   auto result = ffi_bm25_search(index_path, "社会", 10, {}, false).result;
-  cout << "ffi_bm25_search result size:" << result.size() << endl;
+  cout << "ffi_bm25_search result size:" << result.size() << '\n';
 
   for (auto it : result) {
     cout << "ffi_bm25_search rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
-         << " seg_id:" << it.seg_id << endl;
+         << " seg_id:" << it.seg_id << '\n';
   }
 
   result = ffi_bm25_search_with_column_names(index_path, "社会", 10, {}, false, {"col1"}).result;
-  cout << "ffi_bm25_search_with_column_names col1 result size:" << result.size() << endl;
+  cout << "ffi_bm25_search_with_column_names col1 result size:" << result.size() << '\n';
   for (auto it : result) {
     cout << "ffi_bm25_search_with_column_names rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
-         << " seg_id:" << it.seg_id << endl;
+         << " seg_id:" << it.seg_id << '\n';
   }
 
   result = ffi_bm25_search_with_column_names(index_path, "balance", 10, {}, false, {"col4"}).result;
-  cout << "ffi_bm25_search_with_column_names col4 result size:" << result.size() << endl;
+  cout << "ffi_bm25_search_with_column_names col4 result size:" << result.size() << '\n';
   for (auto it : result) {
     cout << "ffi_bm25_search_with_column_names rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
-         << " seg_id:" << it.seg_id << endl;
+         << " seg_id:" << it.seg_id << '\n';
   }
 
   result = ffi_bm25_search_with_column_names(index_path, "社会", 10, {}, false, {"col1", "col4"}).result;
-  cout << "ffi_bm25_search_with_column_names col1,col4 result size:" << result.size() << endl;
+  cout << "ffi_bm25_search_with_column_names col1,col4 result size:" << result.size() << '\n';
   for (auto it : result) {
     cout << "ffi_bm25_search_with_column_names rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
-         << " seg_id:" << it.seg_id << endl;
+         << " seg_id:" << it.seg_id << '\n';
   }
 
   result = ffi_bm25_search_with_column_names(index_path, "社会", 10, {}, false, {"col11", "col44"}).result;
-  cout << "ffi_bm25_search_with_column_names col11,col44 result size:" << result.size() << endl;
+  cout << "ffi_bm25_search_with_column_names col11,col44 result size:" << result.size() << '\n';
 
   result = ffi_bm25_search_with_column_names(index_path, "col2: IN [200 300 400]", 10, {}, false, {}).result;
-  cout << "ffi_bm25_search_with_column_names-1 parser result size:" << result.size() << endl;
+  cout << "ffi_bm25_search_with_column_names-1 parser result size:" << result.size() << '\n';
   for (auto it : result) {
     cout << "ffi_bm25_search_with_column_names rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
-         << " seg_id:" << it.seg_id << endl;
+         << " seg_id:" << it.seg_id << '\n';
   }
 
   result = ffi_bm25_search_with_column_names(index_path, "col222: IN [200 300 400]", 10, {}, false, {}).result;
-  cout << "ffi_bm25_search_with_column_names-2 parser result size:" << result.size() << endl;
+  cout << "ffi_bm25_search_with_column_names-2 parser result size:" << result.size() << '\n';
   for (auto it : result) {
     cout << "ffi_bm25_search_with_column_names rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
-         << " seg_id:" << it.seg_id << endl;
+         << " seg_id:" << it.seg_id << '\n';
   }
 
   auto bm25_result = ffi_bm25_search_with_column_names(index_path, "col2: IN [200 300 400]", 10, {}, false, {});
   if (bm25_result.error_code != 0) {
-    cout << "ffi_bm25_search_with_column_names2-1 error:" << bm25_result.error_msg.c_str() << endl;
+    cout << "ffi_bm25_search_with_column_names2-1 error:" << bm25_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_bm25_search_with_column_names2-1 parser result size:" << bm25_result.result.size() << endl;
+    cout << "ffi_bm25_search_with_column_names2-1 parser result size:" << bm25_result.result.size() << '\n';
     for (auto it : bm25_result.result) {
       cout << "ffi_bm25_search_with_column_names2 rowid:" << it.row_id << " score:" << it.score
-           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << endl;
+           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << '\n';
     }
   }
 
   bm25_result =
       ffi_bm25_search_with_column_names(index_path, "col222: IN [200 300 400 500 600 700 800]", 10, {}, false, {});
   if (bm25_result.error_code != 0) {
-    cout << "ffi_bm25_search_with_column_names2-2 error:" << bm25_result.error_msg.c_str() << endl;
+    cout << "ffi_bm25_search_with_column_names2-2 error:" << bm25_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_bm25_search_with_column_names2-2 parser result size:" << bm25_result.result.size() << endl;
+    cout << "ffi_bm25_search_with_column_names2-2 parser result size:" << bm25_result.result.size() << '\n';
     for (auto it : bm25_result.result) {
       cout << "ffi_bm25_search_with_column_names2 rowid:" << it.row_id << " score:" << it.score
-           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << endl;
+           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << '\n';
     }
   }
 
   auto reload_result = ffi_index_reader_reload(index_path);
   if (reload_result.error_code != 0) {
-    cout << "ffi_index_reader_reload error:" << reload_result.error_msg.c_str() << endl;
+    cout << "ffi_index_reader_reload error:" << reload_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_index_reader_reload success" << endl;
+    cout << "ffi_index_reader_reload success" << '\n';
   }
 
   std::vector<uint32_t> alived_ids;
@@ -452,19 +441,19 @@ void test_multi_type_column() {
   bm25_result =
       ffi_bm25_search_with_column_names(index_path, "col2: IN [800 700 600 500 400 300 200]", 3, alived_ids, true, {});
   if (bm25_result.error_code != 0) {
-    cout << "ffi_bm25_search_with_column_names2-3 filter_ids error:" << bm25_result.error_msg.c_str() << endl;
+    cout << "ffi_bm25_search_with_column_names2-3 filter_ids error:" << bm25_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_bm25_search_with_column_names2-3 filter_ids parser result size:" << bm25_result.result.size() << endl;
+    cout << "ffi_bm25_search_with_column_names2-3 filter_ids parser result size:" << bm25_result.result.size() << '\n';
     for (auto it : bm25_result.result) {
       cout << "ffi_bm25_search_with_column_names2 rowid:" << it.row_id << " score:" << it.score
-           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << endl;
+           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << '\n';
     }
   }
 
   ffi_free_index_reader(index_path);
   ffi_free_index_writer(index_path);
 
-  cout << __func__ << " done" << endl;
+  cout << __func__ << " done" << '\n';
 }
 
 void test_load_multi_type_column() {
@@ -476,18 +465,18 @@ void test_load_multi_type_column() {
   BoolResult bool_result;
   bool_result = ffi_load_index_reader(index_path);
   if (!bool_result.result) {
-    cout << "ffi_load_index_reader error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_load_index_reader error:" << bool_result.error_msg.c_str() << '\n';
     return;
   } else {
-    cout << "ffi_load_index_reader success" << endl;
+    cout << "ffi_load_index_reader success" << '\n';
   }
 
   bool_result = ffi_load_index_writer(index_path);
   if (!bool_result.result) {
-    cout << "ffi_load_index_writer error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_load_index_writer error:" << bool_result.error_msg.c_str() << '\n';
     return;
   } else {
-    cout << "ffi_load_index_writer success" << endl;
+    cout << "ffi_load_index_writer success" << '\n';
   }
 
   bool_result = ffi_index_multi_type_column_docs(index_path, 0, {"col1", "col4"},
@@ -496,51 +485,51 @@ void test_load_multi_type_column() {
                                                   "Ancient empires rise and fall, shaping history's course."},
                                                  {"col2"}, {101}, {}, {});
   if (!bool_result.result) {
-    cout << "ffi_index_multi_type_column_docs error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_index_multi_type_column_docs error:" << bool_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_index_multi_type_column_docs ret:" << bool_result.result << endl;
+    cout << "ffi_index_multi_type_column_docs ret:" << bool_result.result << '\n';
   }
 
   bool_result = ffi_index_writer_commit(index_path);
   if (!bool_result.result) {
-    cout << "ffi_index_writer_commit error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_index_writer_commit error:" << bool_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_index_writer_commit success" << endl;
+    cout << "ffi_index_writer_commit success" << '\n';
   }
 
   bool_result = ffi_index_reader_reload(index_path);
   if (!bool_result.result) {
-    cout << "ffi_index_reader_reload error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_index_reader_reload error:" << bool_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_index_reader_reload success" << endl;
+    cout << "ffi_index_reader_reload success" << '\n';
   }
 
   auto bm25_result = ffi_bm25_search_with_column_names(index_path, "col2: IN [101]", 10, {}, false, {});
   if (bm25_result.error_code != 0) {
-    cout << "ffi_bm25_search_with_column_names2-1 error:" << bm25_result.error_msg.c_str() << endl;
+    cout << "ffi_bm25_search_with_column_names2-1 error:" << bm25_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_bm25_search_with_column_names2-1 parser result size:" << bm25_result.result.size() << endl;
+    cout << "ffi_bm25_search_with_column_names2-1 parser result size:" << bm25_result.result.size() << '\n';
     for (auto it : bm25_result.result) {
       cout << "ffi_bm25_search_with_column_names2 rowid:" << it.row_id << " score:" << it.score
-           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << endl;
+           << " doc_id:" << it.doc_id << " seg_id:" << it.seg_id << '\n';
     }
   }
 
   bool_result = ffi_free_index_reader(index_path);
   if (!bool_result.result) {
-    cout << "ffi_free_index_reader error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_free_index_reader error:" << bool_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_free_index_reader success" << endl;
+    cout << "ffi_free_index_reader success" << '\n';
   }
 
   bool_result = ffi_free_index_writer(index_path);
   if (!bool_result.result) {
-    cout << "ffi_free_index_writer error:" << bool_result.error_msg.c_str() << endl;
+    cout << "ffi_free_index_writer error:" << bool_result.error_msg.c_str() << '\n';
   } else {
-    cout << "ffi_free_index_writer success" << endl;
+    cout << "ffi_free_index_writer success" << '\n';
   }
 
-  cout << __func__ << " done" << endl;
+  cout << __func__ << " done" << '\n';
 }
 
 int main() {
