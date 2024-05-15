@@ -99,6 +99,19 @@ pub fn create_index_with_parameter(
                         INFO!(function:"create_index_with_parameter", "column_name:{}, field_options name: {}", column_name, "F64");
                         continue;
                     }
+                    TokenizerType::Bytes(_) => {
+                        if tokenizer_config.doc_store && tokenizer_config.doc_index {
+                            schema_builder.add_bytes_field(&column_name, STORED | INDEXED);
+                        } else {
+                            if !tokenizer_config.doc_store && tokenizer_config.doc_index {
+                                schema_builder.add_bytes_field(&column_name, INDEXED);
+                            } else {
+                                schema_builder.add_bytes_field(&column_name, STORED);
+                            }
+                        }
+                        INFO!(function:"create_index_with_parameter", "column_name:{}, field_options name: {}", column_name, "Bytes");
+                        continue;
+                    }
                     _ => {
                         WARNING!(function:"create_index_with_parameter", "column_name:{}, tokenizer_type:{}, is_text_field:{}",
                             column_name, tokenizer_config.tokenizer_type.name(), tokenizer_config.is_text_field);
@@ -252,6 +265,8 @@ pub fn index_multi_type_column_docs(
     i64_column_docs: &Vec<i64>,
     f64_column_names: &Vec<String>,
     f64_column_docs: &Vec<f64>,
+    bytes_column_names: &Vec<String>,
+    bytes_column_docs: &Vec<Vec<u8>>,
 ) -> Result<bool, TantivySearchError> {
     // Get index writer from CACHE
     let index_writer_bridge = FFI_INDEX_WRITER_CACHE
@@ -271,6 +286,7 @@ pub fn index_multi_type_column_docs(
     let mut doc = TantivyDocument::default();
     doc.add_u64(row_id_field, row_id);
 
+    // text field
     let mut column_idx = 0;
     for column_name in text_column_names {
         let column_field = schema.get_field(column_name).map_err(|e| {
@@ -281,6 +297,7 @@ pub fn index_multi_type_column_docs(
         column_idx += 1;
     }
 
+    // i64 field
     column_idx = 0;
     for column_name in i64_column_names {
         let column_field = schema.get_field(column_name).map_err(|e| {
@@ -291,6 +308,7 @@ pub fn index_multi_type_column_docs(
         column_idx += 1;
     }
 
+    // f64 field
     column_idx = 0;
     for column_name in f64_column_names {
         let column_field = schema.get_field(column_name).map_err(|e| {
@@ -298,6 +316,17 @@ pub fn index_multi_type_column_docs(
             TantivySearchError::TantivyError(e)
         })?;
         doc.add_f64(column_field, f64_column_docs[column_idx]);
+        column_idx += 1;
+    }
+
+    // bytes field
+    column_idx = 0;
+    for column_name in bytes_column_names {
+        let column_field = schema.get_field(column_name).map_err(|e| {
+            ERROR!(function: "index_multi_column_docs", "Failed to get {} field in schema: {}", column_name, e.to_string());
+            TantivySearchError::TantivyError(e)
+        })?;
+        doc.add_bytes(column_field, bytes_column_docs[column_idx].clone());
         column_idx += 1;
     }
 

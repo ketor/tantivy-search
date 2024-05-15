@@ -104,6 +104,13 @@ pub enum ColumnTokenizer {
         #[serde(default = "default_indexed")]
         indexed: bool,
     },
+    #[serde(rename = "bytes")]
+    Bytes {
+        #[serde(default)]
+        store_doc: bool,
+        #[serde(default = "default_indexed")]
+        indexed: bool,
+    },
 }
 
 fn default_length_limit() -> usize {
@@ -125,6 +132,7 @@ fn default_indexed() -> bool {
 fn chinese_jieba_default() -> String {
     "default".to_string()
 }
+
 fn chinese_mode_default() -> String {
     "search".to_string()
 }

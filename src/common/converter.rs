@@ -70,6 +70,18 @@ impl ConvertStrategy<CxxVector<CxxString>, Vec<String>> for CxxVectorStringStrat
     }
 }
 
+// CxxVector<String> -> Vec<u8>
+pub struct CxxVectorStringToBytesStrategy;
+
+impl ConvertStrategy<CxxVector<CxxString>, Vec<Vec<u8>>> for CxxVectorStringToBytesStrategy {
+    fn convert(&self, items: &CxxVector<CxxString>) -> Result<Vec<Vec<u8>>, CxxConvertError> {
+        items
+            .iter()
+            .map(|item| Ok(item.as_bytes().to_vec()))
+            .collect()
+    }
+}
+
 pub struct Converter<T, U, S>
 where
     S: ConvertStrategy<T, U>,

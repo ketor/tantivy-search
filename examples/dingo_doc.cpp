@@ -53,6 +53,9 @@ const std::string chinese_json = R"({"text":{"tokenizer":{"type":"chinese"}}})";
 const std::string multi_type_column_json =
     R"({"col1": { "tokenizer": { "type": "chinese"}}, "col2": { "tokenizer": {"type": "i64", "indexed": true }}, "col3": { "tokenizer": {"type": "f64", "indexed": true }}, "col4": { "tokenizer": {"type": "chinese"}} })";
 
+const std::string bytes_column_json =
+    R"({"col1": { "tokenizer": { "type": "chinese"}}, "col2": { "tokenizer": {"type": "i64", "indexed": true }}, "col3": { "tokenizer": {"type": "f64", "indexed": true }}, "col4": { "tokenizer": {"type": "chinese"}}, "col5": { "tokenizer": {"type": "bytes", "indexed": true }} })";
+
 void test_default_create() {
   fs::remove_all("./temp");
   tantivy_search_log4rs_initialize("./log", "info", true, false, false);
@@ -237,46 +240,46 @@ void create_and_load_chinese_data(const std::string& index_path) {
                                    {"古代帝国的兴衰更迭，不仅塑造了历史的进程，也铭"
                                     "刻了时代的变迁与文明的发展。",
                                     "Ancient empires rise and fall, shaping history's course."},
-                                   {"col2"}, {100}, {"col3"}, {100.0});
+                                   {"col2"}, {100}, {"col3"}, {100.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 1, text_column_names,
                                    {"艺术的多样表达方式反映了不同文化的丰富遗产，展现了人类创造力的无限可能"
                                     "。",
                                     "Artistic expressions reflect diverse cultural heritages."},
-                                   i64_column_names, {200}, f64_column_names, {200.0});
+                                   i64_column_names, {200}, f64_column_names, {200.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 2, text_column_names,
                                    {"社会运动如同时代的浪潮，改变着社会的面貌，为历史开辟新的道路和方向。",
                                     "Social movements transform societies, forging new paths."},
-                                   i64_column_names, {300}, f64_column_names, {300.0});
+                                   i64_column_names, {300}, f64_column_names, {300.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 3, text_column_names,
                                    {"全球经济的波动复杂多变，如同镜子反映出世界各国之间错综复杂的力量关系。",
                                     "Global economic fluctuations are complex and volatile, reflecting "
                                     "intricate power dynamics among nations."},
-                                   i64_column_names, {400}, f64_column_names, {400.0});
+                                   i64_column_names, {400}, f64_column_names, {400.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 4, text_column_names,
                                    {"战略性的军事行动改变了世界的权力格局，也重新定义了国际政治的均势。",
                                     "Strategic military campaigns alter the balance of power."},
-                                   i64_column_names, {500}, f64_column_names, {500.0});
+                                   i64_column_names, {500}, f64_column_names, {500.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 5, text_column_names,
                                    {"量子物理的飞跃性进展，彻底改写了我们对物理世界规律的理解和认知。",
                                     "Quantum leaps redefine understanding of physical laws."},
-                                   i64_column_names, {600}, f64_column_names, {600.0});
+                                   i64_column_names, {600}, f64_column_names, {600.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 6, text_column_names,
                                    {"化学反应不仅揭开了大自然奥秘的一角，也为科学的探索提供了新的窗口。",
                                     "Chemical reactions unlock mysteries of nature."},
-                                   i64_column_names, {700}, f64_column_names, {700.0});
+                                   i64_column_names, {700}, f64_column_names, {700.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 7, text_column_names,
                                    {"哲学家的辩论深入探讨了生命存在的本质，引发人们对生存意义的深刻思考。",
                                     "Philosophical debates ponder the essence of existence."},
-                                   i64_column_names, {800}, f64_column_names, {800.0});
+                                   i64_column_names, {800}, f64_column_names, {800.0}, {}, {});
   ffi_index_multi_type_column_docs(
       index_path, 8, text_column_names,
       {"婚姻的融合不仅是情感的结合，更是不同传统和文化的交汇，彰显了爱的力量,是社会发展的必须。",
        "Marriages blend traditions, celebrating love's union."},
-      i64_column_names, {900}, f64_column_names, {900.0});
+      i64_column_names, {900}, f64_column_names, {900.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 9, text_column_names,
                                    {"勇敢的探险家发现了未知的领域，为人类的世界观增添了新的地理篇章。",
                                     "Brave explorers discover uncharted territories, expanding world maps."},
-                                   i64_column_names, {1000}, f64_column_names, {1000.0});
+                                   i64_column_names, {1000}, f64_column_names, {1000.0}, {}, {});
 
   ffi_index_writer_commit(index_path);
   ffi_free_index_writer(index_path);
@@ -309,48 +312,48 @@ void test_multi_type_column() {
                                               {"古代帝国的兴衰更迭，不仅塑造了历史的进程，也铭"
                                                "刻了时代的变迁与文明的发展。",
                                                "Ancient empires rise and fall, shaping history's course."},
-                                              {"col2"}, {100}, {"col3"}, {100.0});
+                                              {"col2"}, {100}, {"col3"}, {100.0}, {}, {});
   cout << "ffi_index_multi_type_column_docs ret:" << ret.result << '\n';
 
   ffi_index_multi_type_column_docs(index_path, 1, text_column_names,
                                    {"艺术的多样表达方式反映了不同文化的丰富遗产，展现了人类创造力的无限可能"
                                     "。",
                                     "Artistic expressions reflect diverse cultural heritages."},
-                                   i64_column_names, {200}, f64_column_names, {200.0});
+                                   i64_column_names, {200}, f64_column_names, {200.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 2, text_column_names,
                                    {"社会运动如同时代的浪潮，改变着社会的面貌，为历史开辟新的道路和方向。",
                                     "Social movements transform societies, forging new paths."},
-                                   i64_column_names, {300}, f64_column_names, {300.0});
+                                   i64_column_names, {300}, f64_column_names, {300.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 3, text_column_names,
                                    {"全球经济的波动复杂多变，如同镜子反映出世界各国之间错综复杂的力量关系。",
                                     "Global economic fluctuations are complex and volatile, reflecting "
                                     "intricate power dynamics among nations."},
-                                   i64_column_names, {400}, f64_column_names, {400.0});
+                                   i64_column_names, {400}, f64_column_names, {400.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 4, text_column_names,
                                    {"战略性的军事行动改变了世界的权力格局，也重新定义了国际政治的均势。",
                                     "Strategic military campaigns alter the balance of power."},
-                                   i64_column_names, {500}, f64_column_names, {500.0});
+                                   i64_column_names, {500}, f64_column_names, {500.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 5, text_column_names,
                                    {"量子物理的飞跃性进展，彻底改写了我们对物理世界规律的理解和认知。",
                                     "Quantum leaps redefine understanding of physical laws."},
-                                   i64_column_names, {600}, f64_column_names, {600.0});
+                                   i64_column_names, {600}, f64_column_names, {600.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 6, text_column_names,
                                    {"化学反应不仅揭开了大自然奥秘的一角，也为科学的探索提供了新的窗口。",
                                     "Chemical reactions unlock mysteries of nature."},
-                                   i64_column_names, {700}, f64_column_names, {700.0});
+                                   i64_column_names, {700}, f64_column_names, {700.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 7, text_column_names,
                                    {"哲学家的辩论深入探讨了生命存在的本质，引发人们对生存意义的深刻思考。",
                                     "Philosophical debates ponder the essence of existence."},
-                                   i64_column_names, {800}, f64_column_names, {800.0});
+                                   i64_column_names, {800}, f64_column_names, {800.0}, {}, {});
   ffi_index_multi_type_column_docs(
       index_path, 8, text_column_names,
       {"婚姻的融合不仅是情感的结合，更是不同传统和文化的交汇，彰显了爱的力量,是社会发展的必须。",
        "Marriages blend traditions, celebrating love's union."},
-      i64_column_names, {900}, f64_column_names, {900.0});
+      i64_column_names, {900}, f64_column_names, {900.0}, {}, {});
   ffi_index_multi_type_column_docs(index_path, 9, text_column_names,
                                    {"勇敢的探险家发现了未知的领域，为人类的世界观增添了新的地理篇章。",
                                     "Brave explorers discover uncharted territories, expanding world maps."},
-                                   i64_column_names, {1000}, f64_column_names, {1000.0});
+                                   i64_column_names, {1000}, f64_column_names, {1000.0}, {}, {});
 
   ffi_index_writer_commit(index_path);
 
@@ -483,7 +486,7 @@ void test_load_multi_type_column() {
                                                  {"古代帝国的兴衰更迭，不仅塑造了历史的进程，也铭"
                                                   "刻了时代的变迁与文明的发展。",
                                                   "Ancient empires rise and fall, shaping history's course."},
-                                                 {"col2"}, {101}, {}, {});
+                                                 {"col2"}, {101}, {}, {}, {}, {});
   if (!bool_result.result) {
     cout << "ffi_index_multi_type_column_docs error:" << bool_result.error_msg.c_str() << '\n';
   } else {
@@ -532,11 +535,109 @@ void test_load_multi_type_column() {
   cout << __func__ << " done" << '\n';
 }
 
+void test_bytes_column() {
+  cout << __func__ << " start" << '\n';
+
+  fs::remove_all("./temp");
+  tantivy_search_log4rs_initialize("./log", "info", true, false, false);
+
+  std::string index_path{"./temp"};
+  std::vector<std::string> column_names;
+  column_names.push_back("col1");
+  column_names.push_back("col2");
+  column_names.push_back("col3");
+  column_names.push_back("col4");
+  column_names.push_back("col5");  // bytes column
+
+  std::vector<std::string> text_column_names;
+  text_column_names.push_back("col1");
+  text_column_names.push_back("col4");
+
+  std::vector<std::string> i64_column_names;
+  i64_column_names.push_back("col2");
+
+  std::vector<std::string> f64_column_names;
+  f64_column_names.push_back("col3");
+
+  std::vector<std::string> bytes_column_names;
+  bytes_column_names.push_back("col5");
+
+  ffi_create_index_with_parameter(index_path, column_names, bytes_column_json);
+
+  auto ret = ffi_index_multi_type_column_docs(index_path, 0, {"col1", "col4"},
+                                              {"古代帝国的兴衰更迭，不仅塑造了历史的进程，也铭"
+                                               "刻了时代的变迁与文明的发展。",
+                                               "Ancient empires rise and fall, shaping history's course."},
+                                              {"col2"}, {100}, {"col3"}, {100.0}, bytes_column_names, {"test111"});
+  cout << "ffi_index_multi_type_column_docs ret:" << ret.result << '\n';
+
+  ffi_index_multi_type_column_docs(index_path, 1, text_column_names,
+                                   {"艺术的多样表达方式反映了不同文化的丰富遗产，展现了人类创造力的无限可能"
+                                    "。",
+                                    "Artistic expressions reflect diverse cultural heritages."},
+                                   i64_column_names, {200}, f64_column_names, {200.0}, {"col5"}, {"test111"});
+  cout << "ffi_index_multi_type_column_docs ret:" << ret.result << '\n';
+
+  ffi_index_multi_type_column_docs(index_path, 2, {"col1", "col4"},
+                                   {"社会运动如同时代的浪潮，改变着社会的面貌，为历史开辟新的道路和方向。",
+                                    "Social movements transform societies, forging new paths."},
+                                   i64_column_names, {300}, f64_column_names, {300.0}, {"col5"}, {"test222"});
+  cout << "ffi_index_multi_type_column_docs ret:" << ret.result << '\n';
+
+  ffi_index_writer_commit(index_path);
+
+  ffi_load_index_reader(index_path);
+
+  std::vector<uint32_t> alived_ids;
+  alived_ids.push_back(0);
+  alived_ids.push_back(1);
+  alived_ids.push_back(2);
+  auto bm25_result = ffi_bm25_search_with_column_names(index_path, "col2: IN [100 200]", 3, alived_ids, true, {});
+  if (bm25_result.error_code != 0) {
+    cout << __func__ << "test-1 filter_ids error:" << bm25_result.error_msg.c_str() << '\n';
+  } else {
+    cout << __func__ << "test-1 filter_ids parser result size:" << bm25_result.result.size() << '\n';
+    for (auto it : bm25_result.result) {
+      cout << __func__ << "test-1 rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
+           << " seg_id:" << it.seg_id << '\n';
+    }
+  }
+
+  bm25_result = ffi_bm25_search_with_column_names(index_path, "col3: > 101", 10, {}, false, {});
+  if (bm25_result.error_code != 0) {
+    cout << __func__ << "test-2 parser error:" << bm25_result.error_msg.c_str() << '\n';
+  } else {
+    cout << __func__ << "test-2 parser result size:" << bm25_result.result.size() << '\n';
+    for (auto it : bm25_result.result) {
+      cout << __func__ << "test-2 rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
+           << " seg_id:" << it.seg_id << '\n';
+    }
+  }
+
+  bm25_result = ffi_bm25_search_with_column_names(index_path, "col5: IN [dGVzdDExMQ==]", 10, {}, false, {});
+  if (bm25_result.error_code != 0) {
+    cout << __func__ << "test-3 parser error:" << bm25_result.error_msg.c_str() << '\n';
+  } else {
+    cout << __func__ << "test-3 parser result size:" << bm25_result.result.size() << '\n';
+    for (auto it : bm25_result.result) {
+      cout << __func__ << "test-3 rowid:" << it.row_id << " score:" << it.score << " doc_id:" << it.doc_id
+           << " seg_id:" << it.seg_id << '\n';
+    }
+  }
+
+  ffi_free_index_reader(index_path);
+  ffi_free_index_writer(index_path);
+
+  cout << __func__ << " done" << '\n';
+}
+
 int main() {
   //   test_default_create();
   //   test_tokenizer_create();
-  test_multi_type_column();
-  test_load_multi_type_column();
-  test_get_index_info();
+  // test_multi_type_column();
+  // test_load_multi_type_column();
+  // test_get_index_info();
+  test_bytes_column();
+
   return 0;
 }

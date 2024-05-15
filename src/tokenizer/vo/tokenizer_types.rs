@@ -9,6 +9,7 @@ pub enum TokenizerType {
     Chinese(String),
     I64(String),
     F64(String),
+    Bytes(String),
 }
 
 impl TokenizerType {
@@ -23,6 +24,7 @@ impl TokenizerType {
             TokenizerType::Chinese(name) => name,
             TokenizerType::I64(name) => name,
             TokenizerType::F64(name) => name,
+            TokenizerType::Bytes(name) => name,
         }
     }
 }

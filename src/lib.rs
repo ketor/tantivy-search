@@ -122,6 +122,8 @@ pub mod ffi {
         /// - `i64_column_docs`: align with column_names.
         /// - `f64_column_names`: align with column_docs.
         /// - `f64_column_docs`: align with column_names.
+        /// - `bytes_column_names`: align with column_docs.
+        /// - `bytes_column_docs`: align with column_names.
         fn ffi_index_multi_type_column_docs(
             index_path: &CxxString,
             row_id: u64,
@@ -131,6 +133,8 @@ pub mod ffi {
             i64_column_docs: &CxxVector<i64>,
             f64_column_names: &CxxVector<CxxString>,
             f64_column_docs: &CxxVector<f64>,
+            bytes_column_names: &CxxVector<CxxString>,
+            bytes_column_docs: &CxxVector<CxxString>,
         ) -> BoolResult;
 
         /// Delete a group of rowIds.
@@ -311,7 +315,7 @@ pub mod ffi {
         /// Execute a regex query and return rowIds u8 bitmap.
         /// arguments:
         /// - `index_path`: index directory.
-        /// - `sentence`: from ClickHouse TextSearch function.
+        /// - `sentence`: from DingoDB TextSearch function. If search for bytes field, please use base64 encode for bytes.
         /// - `topk`: only return top k related results.
         /// - `alived_ids`: alived rowIds given by u32 vector.
         /// - `query_with_filter`: whether use alived_bitmap or not.
