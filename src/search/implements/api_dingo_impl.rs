@@ -8,7 +8,7 @@ use crate::{common::constants::LOG_CALLBACK, ERROR, WARNING};
 use std::sync::Arc;
 use tantivy::query::Bm25StatisticsProvider;
 
-use super::strategy::query_strategy::BM25QueryStrategy;
+use super::strategy::query_strategy::BM25QueryStrategy64;
 use super::strategy::query_strategy::QueryExecutor;
 use crate::DEBUG;
 use crate::TRACE;
@@ -23,7 +23,7 @@ pub fn bm25_search_with_column_names(
     index_path: &str,
     sentence: &str,
     topk: u32,
-    alived_ids: &Vec<u32>,
+    alived_ids: &Vec<u64>,
     query_with_filter: bool,
     need_doc: bool,
     column_names: &Vec<String>,
@@ -37,7 +37,7 @@ pub fn bm25_search_with_column_names(
         })?;
 
     // Choose query strategy to construct query executor.
-    let sentence_query: BM25QueryStrategy<'_> = BM25QueryStrategy {
+    let sentence_query: BM25QueryStrategy64<'_> = BM25QueryStrategy64 {
         sentence,
         topk: &topk,
         alived_ids,

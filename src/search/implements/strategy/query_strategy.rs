@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use roaring::RoaringBitmap;
+use roaring::{RoaringBitmap, RoaringTreemap};
 use tantivy::query::{Query, QueryParser, QueryParserError, RegexQuery, TermQuery, TermSetQuery};
 use tantivy::schema::{Field, FieldType, IndexRecordOption, TextFieldIndexing};
 use tantivy::tokenizer::{BoxTokenStream, TextAnalyzer};
@@ -10,7 +10,8 @@ use tantivy::{TantivyError, Term};
 use crate::common::constants::LOG_CALLBACK;
 use crate::logger::logger_bridge::TantivySearchLogger;
 use crate::search::collector::row_id_bitmap_collector::RowIdRoaringCollector;
-use crate::search::collector::top_dos_with_bitmap_collector::TopDocsWithFilter;
+use crate::search::collector::top_docs_with_bitmap_collector::TopDocsWithFilter;
+use crate::search::collector::top_docs_with_treemap_collector::TopDocsWithFilter64;
 use crate::search::utils::convert_utils::ConvertUtils;
 use crate::INFO;
 use crate::{common::errors::IndexSearcherError, ffi::RowIdWithScore, ERROR};
@@ -391,6 +392,96 @@ impl<'a> QueryStrategy<Vec<RowIdWithScore>> for BM25QueryStrategy<'a> {
         // }
         if *self.query_with_filter {
             let mut alive_bitmap: RoaringBitmap = RoaringBitmap::new();
+            alive_bitmap.extend(self.alived_ids);
+            top_docs_collector = top_docs_collector.with_alive(Arc::new(alive_bitmap));
+        }
+
+        let query_parser: QueryParser = QueryParser::for_index(searcher.index(), fields);
+        let text_query: Box<dyn Query> = query_parser.parse_query(self.sentence).map_err(
+            |e: QueryParserError| {
+                ERROR!(function:"BM25QueryStrategy", "Error when parse: {}. {}", self.sentence, e);
+                IndexSearcherError::QueryParserError(e.to_string())
+            },
+        )?;
+
+        searcher.search(&text_query, &top_docs_collector).map_err(|e: TantivyError|{
+            ERROR!(function:"BM25QueryStrategy", "Error when execute: {}. {}", self.sentence, e);
+            IndexSearcherError::TantivyError(e)
+        })
+    }
+}
+
+/// Execute query for a sentence and get bm25 score.
+/// Query will be run in all schema fields but `row_id`.
+/// This sentence may be written by natural language, or just simple terms.
+/// If `query_with_filter` is true, when calculating bm25 score, only in `alive_row_ids` will be recorded.
+///
+/// Params:
+/// - `sentence`: Sentence need to be parsed and query.
+/// - `topk`: max-heap build with topK
+/// - `u8_aived_bitmap`: Represent row_ids who are alived.
+/// - `query_with_filter`: Whether collect row_ids with `u8_alived_bitmap`
+///
+pub struct BM25QueryStrategy64<'a> {
+    pub sentence: &'a str,
+    pub topk: &'a u32,
+    pub alived_ids: &'a Vec<u64>,
+    pub query_with_filter: &'a bool,
+    pub need_doc: &'a bool,
+    pub column_names: &'a Vec<String>,
+}
+
+impl<'a> QueryStrategy<Vec<RowIdWithScore>> for BM25QueryStrategy64<'a> {
+    fn execute(&self, searcher: &Searcher) -> Result<Vec<RowIdWithScore>, IndexSearcherError> {
+        let schema: Schema = searcher.index().schema();
+
+        let fields: Vec<Field> = match self.column_names.is_empty() {
+            true => schema
+                .fields()
+                .filter(|(field, _)| {
+                    schema.get_field_name(*field) != "row_id" && {
+                        match schema.get_field_entry(*field).field_type() {
+                            tantivy::schema::FieldType::Str(_) => true,
+                            _ => false,
+                        }
+                    }
+                })
+                .map(|(field, _)| field)
+                .collect(),
+            false => self
+                .column_names
+                .iter()
+                .filter(|col_name| match schema.get_field(*col_name) {
+                    Ok(field) => match schema.get_field_entry(field).field_type() {
+                        tantivy::schema::FieldType::Str(_) => true,
+                        _ => false,
+                    },
+                    Err(e) => {
+                        let error: IndexSearcherError = IndexSearcherError::TantivyError(e);
+                        ERROR!(function:"BM25QueryStrategy", "{}", error);
+                        return false;
+                    }
+                })
+                .map(|col_name| {
+                    schema.get_field(col_name).map_err(|e| {
+                        let error: IndexSearcherError = IndexSearcherError::TantivyError(e);
+                        ERROR!(function:"BM25QueryStrategy", "{}", error);
+                        error
+                    })
+                })
+                .collect::<Result<Vec<Field>, IndexSearcherError>>()?,
+        };
+
+        INFO!(function:"BM25QueryStrategy", "Fields: {:?}", fields);
+
+        let mut top_docs_collector: TopDocsWithFilter64 =
+            TopDocsWithFilter64::with_limit(*self.topk as usize)
+                .with_searcher(searcher.clone())
+                .with_text_fields(fields.clone())
+                .with_stored_text(*self.need_doc);
+
+        if *self.query_with_filter {
+            let mut alive_bitmap: RoaringTreemap = RoaringTreemap::new();
             alive_bitmap.extend(self.alived_ids);
             top_docs_collector = top_docs_collector.with_alive(Arc::new(alive_bitmap));
         }

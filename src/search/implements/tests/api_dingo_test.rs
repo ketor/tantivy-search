@@ -215,7 +215,7 @@ mod tests {
         need_docs: bool,
         column_names: &Vec<String>,
     ) -> Vec<DocsWithScore> {
-        let alived_ids = crate::search::utils::convert_utils::ConvertUtils::u8_bitmap_to_row_ids(
+        let alived_ids = crate::search::utils::convert_utils::ConvertUtils::u8_bitmap_to_row_ids64(
             &u8_alive_bitmap,
         );
         let res: Vec<RowIdWithScore> = bm25_search_with_column_names(

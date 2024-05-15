@@ -46,12 +46,26 @@ impl ConvertUtils {
     }
 
     // convert u8_bitmap to row_ids
+    #[allow(dead_code)]
     pub fn u8_bitmap_to_row_ids(bitmap: &[u8]) -> Vec<u32> {
         let mut row_ids = Vec::new();
         for (i, &byte) in bitmap.iter().enumerate() {
             for j in 0..8 {
                 if byte & (1 << j) != 0 {
                     row_ids.push((i * 8 + j) as u32);
+                }
+            }
+        }
+        row_ids
+    }
+
+    // convert u8_bitmap to row_ids64
+    pub fn u8_bitmap_to_row_ids64(bitmap: &[u8]) -> Vec<u64> {
+        let mut row_ids = Vec::new();
+        for (i, &byte) in bitmap.iter().enumerate() {
+            for j in 0..8 {
+                if byte & (1 << j) != 0 {
+                    row_ids.push(i as u64 * 8 + j);
                 }
             }
         }

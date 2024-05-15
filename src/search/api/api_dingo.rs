@@ -60,7 +60,7 @@ pub fn ffi_bm25_search(
         }
     };
 
-    let alived_ids = ConvertUtils::u8_bitmap_to_row_ids(&u8_aived_bitmap);
+    let alived_ids = ConvertUtils::u8_bitmap_to_row_ids64(&u8_aived_bitmap);
     let column_names: Vec<String> = Vec::new();
 
     match bm25_search_with_column_names(
@@ -96,7 +96,7 @@ pub fn ffi_bm25_search_filter_ids(
     index_path: &CxxString,
     sentence: &CxxString,
     topk: u32,
-    alived_ids: &CxxVector<u32>,
+    alived_ids: &CxxVector<u64>,
     query_with_filter: bool,
 ) -> BM25Result {
     let index_path: String = match CXX_STRING_CONERTER.convert(index_path) {
@@ -125,7 +125,7 @@ pub fn ffi_bm25_search_filter_ids(
         }
     };
 
-    let alived_ids: Vec<u32> = match cxx_vector_converter::<u32>().convert(alived_ids) {
+    let alived_ids: Vec<u64> = match cxx_vector_converter::<u64>().convert(alived_ids) {
         Ok(bitmap) => bitmap,
         Err(e) => {
             ERROR!(function: "ffi_bm25_search", "Can't convert vector 'alived_ids', message: {}", e);
@@ -173,7 +173,7 @@ pub fn ffi_bm25_search_with_column_names(
     index_path: &CxxString,
     sentence: &CxxString,
     topk: u32,
-    alived_ids: &CxxVector<u32>,
+    alived_ids: &CxxVector<u64>,
     query_with_filter: bool,
     column_names: &CxxVector<CxxString>,
 ) -> BM25Result {
@@ -203,7 +203,7 @@ pub fn ffi_bm25_search_with_column_names(
         }
     };
 
-    let alived_ids: Vec<u32> = match cxx_vector_converter::<u32>().convert(alived_ids) {
+    let alived_ids: Vec<u64> = match cxx_vector_converter::<u64>().convert(alived_ids) {
         Ok(bitmap) => bitmap,
         Err(e) => {
             ERROR!(function: "ffi_bm25_search", "Can't convert vector 'alived_ids', message: {}", e);

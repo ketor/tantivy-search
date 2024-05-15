@@ -308,7 +308,7 @@ pub mod ffi {
             index_path: &CxxString,
             sentence: &CxxString,
             topk: u32,
-            alived_ids: &CxxVector<u32>,
+            alived_ids: &CxxVector<u64>,
             query_with_filter: bool,
         ) -> BM25Result;
 
@@ -324,7 +324,7 @@ pub mod ffi {
             index_path: &CxxString,
             sentence: &CxxString,
             topk: u32,
-            alived_ids: &CxxVector<u32>,
+            alived_ids: &CxxVector<u64>,
             query_with_filter: bool,
             column_names: &CxxVector<CxxString>,
         ) -> BM25Result;

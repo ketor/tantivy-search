@@ -11,8 +11,8 @@ mod tests {
         common::tests::index_3column_docs_with_threads_merge,
         ffi::RowIdWithScore,
         search::implements::strategy::query_strategy::{
-            BM25QueryStrategy, ParserQueryStrategy, QueryExecutor, RegexQueryStrategy,
-            SingleTermQueryStrategy, TermSetQueryStrategy,
+            BM25QueryStrategy, BM25QueryStrategy64, ParserQueryStrategy, QueryExecutor,
+            RegexQueryStrategy, SingleTermQueryStrategy, TermSetQueryStrategy,
         },
     };
 
@@ -126,6 +126,60 @@ mod tests {
 
         // Choose query strategy to construct query executor.
         let bm25_strategy: BM25QueryStrategy<'_> = BM25QueryStrategy {
+            sentence: "Literary inventions capture philosophical masterpieces.",
+            topk: &10,
+            query_with_filter: &false,
+            alived_ids: &vec![],
+            need_doc: &false,
+            column_names: &create_3column_names(),
+        };
+        let query_executor: QueryExecutor<'_, Vec<RowIdWithScore>> =
+            QueryExecutor::new(&bm25_strategy);
+
+        // Compute query results.
+        let result: Vec<RowIdWithScore> = query_executor.execute(&index_reader.searcher()).unwrap();
+
+        assert_eq!(result[0].row_id, 2);
+        assert!(result[0].score >= 4.0);
+        assert_eq!(result[1].row_id, 0);
+        assert!(result[1].score <= 1.6);
+    }
+
+    #[test]
+    fn test_bm25_query_strategy64() {
+        let temp_directory: TempDir = TempDir::new().unwrap();
+        let temp_directory_str: &str = temp_directory.path().to_str().unwrap();
+        let (index_reader, _) = index_3column_docs_with_threads_merge(temp_directory_str);
+
+        // Choose query strategy to construct query executor.
+        let bm25_strategy: BM25QueryStrategy64<'_> = BM25QueryStrategy64 {
+            sentence: "Literary inventions capture philosophical masterpieces.",
+            topk: &10,
+            query_with_filter: &false,
+            alived_ids: &vec![],
+            need_doc: &false,
+            column_names: &vec![],
+        };
+        let query_executor: QueryExecutor<'_, Vec<RowIdWithScore>> =
+            QueryExecutor::new(&bm25_strategy);
+
+        // Compute query results.
+        let result: Vec<RowIdWithScore> = query_executor.execute(&index_reader.searcher()).unwrap();
+
+        assert_eq!(result[0].row_id, 2);
+        assert!(result[0].score >= 4.0);
+        assert_eq!(result[1].row_id, 0);
+        assert!(result[1].score <= 1.6);
+    }
+
+    #[test]
+    fn test_bm25_query_strategy_with_column_names64() {
+        let temp_directory: TempDir = TempDir::new().unwrap();
+        let temp_directory_str: &str = temp_directory.path().to_str().unwrap();
+        let (index_reader, _) = index_3column_docs_with_threads_merge(temp_directory_str);
+
+        // Choose query strategy to construct query executor.
+        let bm25_strategy: BM25QueryStrategy64<'_> = BM25QueryStrategy64 {
             sentence: "Literary inventions capture philosophical masterpieces.",
             topk: &10,
             query_with_filter: &false,

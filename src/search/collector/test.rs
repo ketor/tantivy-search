@@ -2,7 +2,7 @@
 mod tests {
     use std::sync::Arc;
 
-    use crate::search::collector::top_dos_with_bitmap_collector::TopDocsWithFilter;
+    use crate::search::collector::top_docs_with_bitmap_collector::TopDocsWithFilter;
 
     use roaring::RoaringBitmap;
     use tantivy::merge_policy::LogMergePolicy;

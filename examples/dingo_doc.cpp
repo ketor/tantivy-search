@@ -435,7 +435,7 @@ void test_multi_type_column() {
     cout << "ffi_index_reader_reload success" << '\n';
   }
 
-  std::vector<uint32_t> alived_ids;
+  std::vector<uint64_t> alived_ids;
   alived_ids.push_back(2);
   alived_ids.push_back(4);
   alived_ids.push_back(5);
@@ -588,7 +588,7 @@ void test_bytes_column() {
 
   ffi_load_index_reader(index_path);
 
-  std::vector<uint32_t> alived_ids;
+  std::vector<uint64_t> alived_ids;
   alived_ids.push_back(0);
   alived_ids.push_back(1);
   alived_ids.push_back(2);
