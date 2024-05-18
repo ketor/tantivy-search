@@ -841,7 +841,7 @@ struct Statistics final {
 // arguments:
 // - `index_path`: index directory.
 // - `row_ids`: a group of rowIds need be deleted.
-::BoolResult ffi_delete_row_ids(::std::string const &index_path, ::std::vector<::std::uint32_t> const &row_ids) noexcept;
+::BoolResult ffi_delete_row_ids(::std::string const &index_path, ::std::vector<::std::uint64_t> const &row_ids) noexcept;
 
 // Commit index writer
 // arguments:
@@ -958,7 +958,10 @@ struct Statistics final {
 // - `topk`: only return top k related results.
 // - `alived_ids`: alived rowIds given by u32 vector.
 // - `query_with_filter`: whether use alived_bitmap or not.
-::BM25Result ffi_bm25_search_filter_ids(::std::string const &index_path, ::std::string const &sentence, ::std::uint32_t topk, ::std::vector<::std::uint64_t> const &alived_ids, bool query_with_filter) noexcept;
+// - `query_with_id_range`: whether use id range or not, [start_id, end_id).
+// - `start_id`: id range start.
+// - `end_id`: id range end.
+::BM25Result ffi_bm25_search_filter_ids(::std::string const &index_path, ::std::string const &sentence, ::std::uint32_t topk, ::std::vector<::std::uint64_t> const &alived_ids, bool query_with_filter, bool query_with_id_range, ::std::uint64_t start_id, ::std::uint64_t end_id) noexcept;
 
 // Execute a regex query and return rowIds u8 bitmap.
 // arguments:
@@ -967,8 +970,11 @@ struct Statistics final {
 // - `topk`: only return top k related results.
 // - `alived_ids`: alived rowIds given by u32 vector.
 // - `query_with_filter`: whether use alived_bitmap or not.
+// - `query_with_id_range`: whether use id range or not, [start_id, end_id).
+// - `start_id`: id range start.
+// - `end_id`: id range end.
 // - `colunm_names`: for multi column search.
-::BM25Result ffi_bm25_search_with_column_names(::std::string const &index_path, ::std::string const &sentence, ::std::uint32_t topk, ::std::vector<::std::uint64_t> const &alived_ids, bool query_with_filter, ::std::vector<::std::string> const &column_names) noexcept;
+::BM25Result ffi_bm25_search_with_column_names(::std::string const &index_path, ::std::string const &sentence, ::std::uint32_t topk, ::std::vector<::std::uint64_t> const &alived_ids, bool query_with_filter, bool query_with_id_range, ::std::uint64_t start_id, ::std::uint64_t end_id, ::std::vector<::std::string> const &column_names) noexcept;
 
 // Get doc freq for current part.
 // arguments:

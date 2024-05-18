@@ -159,14 +159,14 @@ void run_benchmark(size_t idx,                                // iter id
           // for bm25_search test
           if (only_random_delete) {
             // just delete random row ids.
-            std::vector<u_int32_t> delete_row_ids = randomExtractK<size_t, u_int32_t>(row_id_range, bm25_search_topk);
+            std::vector<u_int64_t> delete_row_ids = randomExtractK<size_t, u_int64_t>(row_id_range, bm25_search_topk);
             ffi_delete_row_ids(index_path, delete_row_ids);
           } else {
             // Step1. first bm25 search.
             auto bm25_result = ffi_bm25_search(index_path, term, bm25_search_topk, {}, false);
             const auto &result = bm25_result.result;
-            std::vector<uint32_t> row_ids;
-            for (size_t i = 0; i < result.size(); i++) row_ids.push_back(static_cast<uint32_t>(result[i].row_id));
+            std::vector<uint64_t> row_ids;
+            for (size_t i = 0; i < result.size(); i++) row_ids.push_back(static_cast<uint64_t>(result[i].row_id));
             if (use_topk_delete) {
               // Step2. delete row_ids in first step.
               ffi_delete_row_ids(index_path, row_ids);
@@ -175,9 +175,9 @@ void run_benchmark(size_t idx,                                // iter id
                 auto bm_25result_after_delete = ffi_bm25_search(index_path, term, bm25_search_topk, {}, false);
                 const auto &result_after_delete = bm_25result_after_delete.result;
 
-                std::vector<uint32_t> row_ids_after_delete;
+                std::vector<uint64_t> row_ids_after_delete;
                 for (size_t i = 0; i < result_after_delete.size(); i++)
-                  row_ids_after_delete.push_back(static_cast<uint32_t>(result_after_delete[i].row_id));
+                  row_ids_after_delete.push_back(static_cast<uint64_t>(result_after_delete[i].row_id));
                 size_t intersection = intersection_size(row_ids, row_ids_after_delete);
                 if (intersection != 0) {
                   LOG(ERROR) << "Error happend with delete operation, "

@@ -27,6 +27,7 @@ static INITIAL_HEAP_SIZE: usize = 1000;
 pub struct TopDocsWithFilter64 {
     pub limit: usize,
     pub row_id_treemap: Option<Arc<RoaringTreemap>>,
+    pub row_id_range: Option<(u64, u64)>,
     pub searcher: Option<Searcher>,
     pub text_fields: Option<Vec<Field>>,
     pub need_text: bool,
@@ -40,6 +41,7 @@ impl TopDocsWithFilter64 {
         Self {
             limit,
             row_id_treemap: None,
+            row_id_range: None,
             searcher: None,
             text_fields: None,
             need_text: false,
@@ -50,6 +52,12 @@ impl TopDocsWithFilter64 {
     // `row_id_bitmap` is used to mark aive row_ids.
     pub fn with_alive(mut self, row_id_bitmap: Arc<RoaringTreemap>) -> TopDocsWithFilter64 {
         self.row_id_treemap = Some(Arc::clone(&row_id_bitmap));
+        self
+    }
+
+    // `row_id_range` is used to mark alive row_id range, the range is [start, end)
+    pub fn with_range(mut self, row_id_range: (u64, u64)) -> TopDocsWithFilter64 {
+        self.row_id_range = Some(row_id_range);
         self
     }
 
@@ -131,9 +139,11 @@ impl fmt::Debug for TopDocsWithFilter64 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "TopDocsWithFilter64(limit:{}, row_ids_size:{}, text_fields_is_some:{}, searcher_is_some:{}, need_text:{}, initial_heap_size:{})",
+            "TopDocsWithFilter64(limit:{}, row_ids_size:{}, row_id_range_start:{} row_id_range_end:{} text_fields_is_some:{}, searcher_is_some:{}, need_text:{}, initial_heap_size:{})",
             self.limit,
             if self.row_id_treemap.is_some() {self.row_id_treemap.clone().unwrap().len()} else {0},
+            if self.row_id_range.is_some() {self.row_id_range.clone().unwrap().0} else {0},
+            if self.row_id_range.is_some() {self.row_id_range.clone().unwrap().1} else {0},
             self.text_fields.is_some(),
             self.searcher.is_some(),
             self.need_text,
@@ -191,6 +201,12 @@ impl Collector for TopDocsWithFilter64 {
                 {
                     return threshold;
                 }
+                if self.row_id_range.is_some()
+                    && !(self.row_id_range.clone().unwrap().0 <= row_id
+                        && row_id < self.row_id_range.clone().unwrap().1)
+                {
+                    return threshold;
+                }
                 if alive_bitset.is_deleted(doc) {
                     return threshold;
                 }
@@ -217,6 +233,12 @@ impl Collector for TopDocsWithFilter64 {
                 let row_id = row_id_field_reader.get_val(doc);
                 if self.row_id_treemap.is_some()
                     && !self.row_id_treemap.clone().unwrap().contains(row_id)
+                {
+                    return Score::MIN;
+                }
+                if self.row_id_range.is_some()
+                    && !(self.row_id_range.clone().unwrap().0 <= row_id
+                        && row_id < self.row_id_range.clone().unwrap().1)
                 {
                     return Score::MIN;
                 }

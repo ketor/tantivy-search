@@ -421,12 +421,18 @@ impl<'a> QueryStrategy<Vec<RowIdWithScore>> for BM25QueryStrategy<'a> {
 /// - `topk`: max-heap build with topK
 /// - `u8_aived_bitmap`: Represent row_ids who are alived.
 /// - `query_with_filter`: Whether collect row_ids with `u8_alived_bitmap`
+/// - `query_with_id_range`: Whether collect row_ids with `[start_id, end_id)`
+/// - `start_id`: The start of row_ids range
+/// - `end_id`: The end of row_ids range
 ///
 pub struct BM25QueryStrategy64<'a> {
     pub sentence: &'a str,
     pub topk: &'a u32,
     pub alived_ids: &'a Vec<u64>,
     pub query_with_filter: &'a bool,
+    pub query_with_id_range: &'a bool,
+    pub start_id: &'a u64,
+    pub end_id: &'a u64,
     pub need_doc: &'a bool,
     pub column_names: &'a Vec<String>,
 }
@@ -484,6 +490,10 @@ impl<'a> QueryStrategy<Vec<RowIdWithScore>> for BM25QueryStrategy64<'a> {
             let mut alive_bitmap: RoaringTreemap = RoaringTreemap::new();
             alive_bitmap.extend(self.alived_ids);
             top_docs_collector = top_docs_collector.with_alive(Arc::new(alive_bitmap));
+        }
+
+        if *self.query_with_id_range {
+            top_docs_collector = top_docs_collector.with_range((*self.start_id, *self.end_id));
         }
 
         let query_parser: QueryParser = QueryParser::for_index(searcher.index(), fields);

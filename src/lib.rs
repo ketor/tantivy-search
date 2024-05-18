@@ -141,7 +141,7 @@ pub mod ffi {
         /// arguments:
         /// - `index_path`: index directory.
         /// - `row_ids`: a group of rowIds need be deleted.
-        fn ffi_delete_row_ids(index_path: &CxxString, row_ids: &CxxVector<u32>) -> BoolResult;
+        fn ffi_delete_row_ids(index_path: &CxxString, row_ids: &CxxVector<u64>) -> BoolResult;
 
         /// Commit index writer
         /// arguments:
@@ -304,12 +304,18 @@ pub mod ffi {
         /// - `topk`: only return top k related results.
         /// - `alived_ids`: alived rowIds given by u32 vector.
         /// - `query_with_filter`: whether use alived_bitmap or not.
+        /// - `query_with_id_range`: whether use id range or not, [start_id, end_id).
+        /// - `start_id`: id range start.
+        /// - `end_id`: id range end.
         pub fn ffi_bm25_search_filter_ids(
             index_path: &CxxString,
             sentence: &CxxString,
             topk: u32,
             alived_ids: &CxxVector<u64>,
             query_with_filter: bool,
+            query_with_id_range: bool,
+            start_id: u64,
+            end_id: u64,
         ) -> BM25Result;
 
         /// Execute a regex query and return rowIds u8 bitmap.
@@ -319,6 +325,9 @@ pub mod ffi {
         /// - `topk`: only return top k related results.
         /// - `alived_ids`: alived rowIds given by u32 vector.
         /// - `query_with_filter`: whether use alived_bitmap or not.
+        /// - `query_with_id_range`: whether use id range or not, [start_id, end_id).
+        /// - `start_id`: id range start.
+        /// - `end_id`: id range end.
         /// - `colunm_names`: for multi column search.
         pub fn ffi_bm25_search_with_column_names(
             index_path: &CxxString,
@@ -326,6 +335,9 @@ pub mod ffi {
             topk: u32,
             alived_ids: &CxxVector<u64>,
             query_with_filter: bool,
+            query_with_id_range: bool,
+            start_id: u64,
+            end_id: u64,
             column_names: &CxxVector<CxxString>,
         ) -> BM25Result;
 

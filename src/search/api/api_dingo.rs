@@ -70,6 +70,9 @@ pub fn ffi_bm25_search(
         &alived_ids,
         query_with_filter,
         false,
+        0,
+        0,
+        false,
         &column_names,
     ) {
         Ok(results) => {
@@ -98,6 +101,9 @@ pub fn ffi_bm25_search_filter_ids(
     topk: u32,
     alived_ids: &CxxVector<u64>,
     query_with_filter: bool,
+    query_with_id_range: bool,
+    start_id: u64,
+    end_id: u64,
 ) -> BM25Result {
     let index_path: String = match CXX_STRING_CONERTER.convert(index_path) {
         Ok(path) => path,
@@ -146,6 +152,9 @@ pub fn ffi_bm25_search_filter_ids(
         topk,
         &alived_ids,
         query_with_filter,
+        query_with_id_range,
+        start_id,
+        end_id,
         false,
         &column_names,
     ) {
@@ -175,6 +184,9 @@ pub fn ffi_bm25_search_with_column_names(
     topk: u32,
     alived_ids: &CxxVector<u64>,
     query_with_filter: bool,
+    query_with_id_range: bool,
+    start_id: u64,
+    end_id: u64,
     column_names: &CxxVector<CxxString>,
 ) -> BM25Result {
     let index_path: String = match CXX_STRING_CONERTER.convert(index_path) {
@@ -237,6 +249,9 @@ pub fn ffi_bm25_search_with_column_names(
         topk,
         &alived_ids,
         query_with_filter,
+        query_with_id_range,
+        start_id,
+        end_id,
         false,
         &column_names,
     ) {

@@ -25,6 +25,9 @@ pub fn bm25_search_with_column_names(
     topk: u32,
     alived_ids: &Vec<u64>,
     query_with_filter: bool,
+    query_with_id_range: bool,
+    start_id: u64,
+    end_id: u64,
     need_doc: bool,
     column_names: &Vec<String>,
 ) -> Result<Vec<RowIdWithScore>, TantivySearchError> {
@@ -42,6 +45,9 @@ pub fn bm25_search_with_column_names(
         topk: &topk,
         alived_ids,
         query_with_filter: &query_with_filter,
+        query_with_id_range: &query_with_id_range,
+        start_id: &start_id,
+        end_id: &end_id,
         need_doc: &need_doc,
         column_names: &column_names,
     };

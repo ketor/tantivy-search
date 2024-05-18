@@ -224,6 +224,9 @@ mod tests {
             topk,
             &alived_ids,
             use_filter,
+            false,
+            0,
+            0,
             need_docs,
             column_names,
         )

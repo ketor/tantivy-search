@@ -340,7 +340,7 @@ pub fn index_multi_type_column_docs(
     }
 }
 
-pub fn delete_row_ids(index_path: &str, row_ids: &Vec<u32>) -> Result<bool, TantivySearchError> {
+pub fn delete_row_ids(index_path: &str, row_ids: &Vec<u64>) -> Result<bool, TantivySearchError> {
     // Get index writer from CACHE
     let index_writer_bridge =
         match FFI_INDEX_WRITER_CACHE.get_index_writer_bridge(index_path.to_string()) {
@@ -359,7 +359,7 @@ pub fn delete_row_ids(index_path: &str, row_ids: &Vec<u32>) -> Result<bool, Tant
 
     let terms = row_ids
         .iter()
-        .map(|row_id| Term::from_field_u64(row_id_field, *row_id as u64))
+        .map(|row_id| Term::from_field_u64(row_id_field, *row_id))
         .collect();
 
     // Delete row_id terms.

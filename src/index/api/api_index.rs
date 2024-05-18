@@ -437,7 +437,7 @@ pub fn ffi_index_multi_type_column_docs(
     }
 }
 
-pub fn ffi_delete_row_ids(index_path: &CxxString, row_ids: &CxxVector<u32>) -> BoolResult {
+pub fn ffi_delete_row_ids(index_path: &CxxString, row_ids: &CxxVector<u64>) -> BoolResult {
     let index_path: String = match CXX_STRING_CONERTER.convert(index_path) {
         Ok(path) => path,
         Err(e) => {
@@ -451,7 +451,7 @@ pub fn ffi_delete_row_ids(index_path: &CxxString, row_ids: &CxxVector<u32>) -> B
         }
     };
 
-    let row_ids: Vec<u32> = match cxx_vector_converter::<u32>().convert(row_ids) {
+    let row_ids: Vec<u64> = match cxx_vector_converter::<u64>().convert(row_ids) {
         Ok(ids) => ids,
         Err(e) => {
             ERROR!(function: "ffi_delete_row_ids", "Can't convert 'row_ids', message: {}", e);

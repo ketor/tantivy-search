@@ -201,9 +201,9 @@ class BoundaryTantivyDeleteRowIdsTest : public ::testing::Test, public BoundaryU
     }
   }
 
-  vector<uint32_t> GenerateRowIdsToDelete(size_t totalDocNums, bool isFistDelete) {
+  vector<uint64_t> GenerateRowIdsToDelete(size_t totalDocNums, bool isFistDelete) {
     if (isFistDelete) {
-      vector<uint32_t> rowIdsFirstDelete = {
+      vector<uint64_t> rowIdsFirstDelete = {
           0,
           1,
           2,
@@ -213,12 +213,12 @@ class BoundaryTantivyDeleteRowIdsTest : public ::testing::Test, public BoundaryU
           9000,
           9001,
           9002,
-          static_cast<uint32_t>(totalDocNums) + 1,
-          static_cast<uint32_t>(totalDocNums) + 2  // delete not exist row_ids
+          static_cast<uint64_t>(totalDocNums) + 1,
+          static_cast<uint64_t>(totalDocNums) + 2  // delete not exist row_ids
       };
       return rowIdsFirstDelete;
     } else {
-      vector<uint32_t> rowIdsSecondDelete = {
+      vector<uint64_t> rowIdsSecondDelete = {
           0,
           1,
           2,
@@ -238,8 +238,8 @@ class BoundaryTantivyDeleteRowIdsTest : public ::testing::Test, public BoundaryU
           9003,
           9004,
           9005,
-          static_cast<uint32_t>(totalDocNums) + 3,
-          static_cast<uint32_t>(totalDocNums) + 4  // delete not exist row_ids
+          static_cast<uint64_t>(totalDocNums) + 3,
+          static_cast<uint64_t>(totalDocNums) + 4  // delete not exist row_ids
       };
       return rowIdsSecondDelete;
     }

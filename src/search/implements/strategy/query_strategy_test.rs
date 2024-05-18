@@ -157,6 +157,9 @@ mod tests {
             topk: &10,
             query_with_filter: &false,
             alived_ids: &vec![],
+            query_with_id_range: &false,
+            start_id: &0,
+            end_id: &0,
             need_doc: &false,
             column_names: &vec![],
         };
@@ -184,6 +187,9 @@ mod tests {
             topk: &10,
             query_with_filter: &false,
             alived_ids: &vec![],
+            query_with_id_range: &false,
+            start_id: &0,
+            end_id: &0,
             need_doc: &false,
             column_names: &create_3column_names(),
         };
