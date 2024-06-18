@@ -326,7 +326,7 @@ pub fn index_multi_type_column_docs(
             ERROR!(function: "index_multi_column_docs", "Failed to get {} field in schema: {}", column_name, e.to_string());
             TantivySearchError::TantivyError(e)
         })?;
-        doc.add_bytes(column_field, bytes_column_docs[column_idx].clone());
+        doc.add_bytes(column_field, bytes_column_docs[column_idx].as_slice());
         column_idx += 1;
     }
 
